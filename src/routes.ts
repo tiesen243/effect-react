@@ -1,5 +1,5 @@
-import { Application } from '@/core/application'
-import ShowRoute from '@/routes/[id]'
-import HomeIndexRoute from '@/routes/home'
+import { RouteBuilder } from '@/framework'
+import { RootLayout } from '@/root'
+import IndexRoute from '@/routes/index'
 
-export default Application.empty.add('/', HomeIndexRoute).add('/:id', ShowRoute)
+export default RouteBuilder.empty.layout(RootLayout).add('/', IndexRoute)

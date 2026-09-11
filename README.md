@@ -1,15 +1,77 @@
-# effect-react
+# Effect RSC Framework
 
-To install dependencies:
+Flat React + Vite + RSC + Effect framework prototype.
 
-```bash
-bun install
+## Route builder
+
+Every route path must start with `/`:
+
+```ts
+const dashboard = RouteBuilder.layout(DashboardLayout).add(
+  '/dashboard',
+  DashboardRoute
+)
+
+export default RouteBuilder.layout(RootLayout)
+  .add('/', IndexRoute)
+  .merge(dashboard)
 ```
 
-To run:
+A merged builder is a **nested scope**, not a flattened route list:
 
-```bash
-bun run index.ts
+```text
+/dashboard
+RootLayout
+└── DashboardLayout
+    └── DashboardRoute
 ```
 
-This project was created using `bun init` in bun v1.4.2. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+### Prefix
+
+`prefix()` scopes a builder to a URL prefix. The argument must start with `/`:
+
+```ts
+const dashboard = RouteBuilder.prefix('/dashboard')
+  .layout(DashboardLayout)
+  .add('/settings', SettingsRoute)
+  .add('/users', UsersRoute)
+```
+
+This creates `/dashboard/settings` and `/dashboard/users`.
+
+### Effect service scoping
+
+`provide()` is scoped to the builder and its descendants. It does not leak to sibling builders:
+
+```ts
+const dashboard = RouteBuilder.layout(DashboardLayout)
+  .provide(DashboardLive)
+  .add('/dashboard', DashboardRoute)
+
+const admin = RouteBuilder.provide(AdminLive).add('/admin', AdminRoute)
+
+const root = RouteBuilder.layout(RootLayout)
+  .add('/', IndexRoute)
+  .merge(dashboard)
+  .merge(admin)
+```
+
+`/dashboard` receives `DashboardLive` (plus any parent layers), `/admin` receives `AdminLive`, and neither sibling receives the other's layer.
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+Open `/todos` or `/dashboard`.
+
+## Production
+
+```bash
+npm run build
+npm start
+```
+
+The production server is the Node adapter in `server.mjs`.
