@@ -2,8 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "effect-react",
   "compatibility_date": "2026-09-11",
-  "main": "./dist/rsc/index.js",
-  "assets": {
-    "directory": "./dist/client",
-  },
+  "main": "./src/core/entry.rsc.tsx",
+  "workers_dev": true,
+  "compatibility_flags": ["nodejs_als"],
 }

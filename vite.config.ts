@@ -6,15 +6,19 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [
-    rsc(),
-    react(),
-    tailwindcss(),
+    rsc({
+      serverHandler: false,
+    }),
+
     cloudflare({
       viteEnvironment: {
         name: 'rsc',
         childEnvironments: ['ssr'],
       },
     }),
+
+    react(),
+    tailwindcss(),
   ],
   resolve: { tsconfigPaths: true },
   environments: {
@@ -22,15 +26,15 @@ export default defineConfig({
     // this environment is responsible for:
     // - RSC stream serialization (React VDOM -> RSC stream)
     // - server functions handling
-    rsc: {
-      build: {
-        rolldownOptions: {
-          input: {
-            index: './src/core/entry.rsc.tsx',
-          },
-        },
-      },
-    },
+    // rsc: {
+    //   build: {
+    //     rolldownOptions: {
+    //       input: {
+    //         index: './src/core/entry.rsc.tsx',
+    //       },
+    //     },
+    //   },
+    // },
 
     // `ssr` environment loads modules without `react-server` condition.
     // this environment is responsible for:
@@ -38,11 +42,15 @@ export default defineConfig({
     // - traditional SSR (React VDOM -> HTML string/stream)
     ssr: {
       build: {
+        outDir: 'dist/rsc/ssr',
         rollupOptions: {
           input: {
             index: './src/core/entry.ssr.tsx',
           },
         },
+      },
+      optimizeDeps: {
+        entries: ['./src/core/entry.ssr.tsx'],
       },
     },
 
