@@ -2,6 +2,7 @@
 node_modules
 
 # output
+.output/
 out
 dist
 *.tgz
@@ -16,11 +17,8 @@ _.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+.env*
+!.env.example
 
 # caches
 .eslintcache
@@ -32,3 +30,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# Vercel
+.vercel/

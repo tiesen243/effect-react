@@ -2,9 +2,10 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import rsc from '@vitejs/plugin-rsc'
 import { defineConfig } from 'vite'
+import vercel from 'vite-plugin-vercel/vite'
 
 export default defineConfig({
-  plugins: [rsc(), react(), tailwindcss()],
+  plugins: [rsc(), react(), tailwindcss(), vercel()],
   resolve: { tsconfigPaths: true },
   environments: {
     // `rsc` environment loads modules with `react-server` condition.
