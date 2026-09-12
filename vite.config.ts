@@ -1,11 +1,21 @@
+import { cloudflare } from '@cloudflare/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import rsc from '@vitejs/plugin-rsc'
 import { defineConfig } from 'vite'
-import vercel from 'vite-plugin-vercel/vite'
 
 export default defineConfig({
-  plugins: [rsc(), react(), tailwindcss(), vercel()],
+  plugins: [
+    rsc(),
+    react(),
+    tailwindcss(),
+    cloudflare({
+      viteEnvironment: {
+        name: 'rsc',
+        childEnvironments: ['ssr'],
+      },
+    }),
+  ],
   resolve: { tsconfigPaths: true },
   environments: {
     // `rsc` environment loads modules with `react-server` condition.
