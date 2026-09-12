@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     // Environment setup & latest features
-    "lib": ["ESNext"],
-    "target": "ESNext",
-    "module": "Preserve",
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "target": "esnext",
+    "module": "preserve",
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "allowJs": true,
@@ -31,6 +31,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "vite.config.ts"],
+  "include": ["src", "*.config.ts"],
   "exclude": ["node_modules", "dist"]
 }
