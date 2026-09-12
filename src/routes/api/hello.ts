@@ -3,7 +3,7 @@ import * as Effect from 'effect/Effect'
 import { createRoute } from '@/core/route'
 
 export default createRoute({
-  path: '/api/hello',
+  path: '/hello',
 
   loader: (_params, request) =>
     Effect.succeed({

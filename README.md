@@ -75,21 +75,21 @@ bun run lint
 ```text
 src/
 ├── components/
-│   ├── providers.tsx
-│   └── ui/
+│   ├── ui/
+│   └── providers.tsx
 ├── core/
 │   ├── entry.client.tsx
 │   ├── entry.rsc.tsx
 │   ├── entry.ssr.tsx
 │   ├── react.tsx
 │   ├── request.ts
-│   ├── route.ts
-│   └── route-builder.ts
+│   ├── route-builder.ts
+│   └── route.ts
 ├── routes/
-│   ├── _index.tsx
+│   ├── api/
+│   │    └── hello.ts
 │   ├── [id].tsx
-│   └── api/
-│       └── hello.ts
+│   └── _index.tsx
 ├── services/
 │   └── app.service.ts
 ├── root.tsx

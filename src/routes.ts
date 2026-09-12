@@ -5,13 +5,12 @@ import IndexRoute from '@/routes/_index'
 import ApiHelloRoute from '@/routes/api/hello'
 import { AppService } from '@/services/app.service'
 
-export default RouteBuilder.empty
+const WebRoutes = RouteBuilder.empty
   .layout(RootLayout)
-
-  .add(ApiHelloRoute)
-
   .add(IndexRoute)
-
   .add(DynamicRoute)
-
   .provide(AppService.layer)
+
+const ApiRoutes = RouteBuilder.empty.prefix('/api').add(ApiHelloRoute)
+
+export default RouteBuilder.empty.merge(ApiRoutes).merge(WebRoutes)

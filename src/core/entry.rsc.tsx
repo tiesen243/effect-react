@@ -100,9 +100,8 @@ async function handleApiRequest(
 
   let params: unknown = match.params
   try {
-    if (entry.route.params) {
+    if (entry.route.params)
       params = Schema.decodeUnknownSync(entry.route.params)(match.params)
-    }
   } catch (error) {
     return Response.json(
       { error: 'Invalid route parameters', details: String(error) },
@@ -111,7 +110,7 @@ async function handleApiRequest(
   }
 
   const method = request.method.toUpperCase()
-  if (method !== 'GET' && method !== 'POST') {
+  if (method !== 'GET' && method !== 'POST')
     return Response.json(
       { error: 'Method Not Allowed' },
       {
@@ -119,10 +118,9 @@ async function handleApiRequest(
         headers: { Allow: 'GET, POST' },
       }
     )
-  }
 
   const handler = method === 'GET' ? entry.route.loader : entry.route.action
-  if (!handler) {
+  if (!handler)
     return Response.json(
       { error: 'Method Not Allowed' },
       {
@@ -137,15 +135,12 @@ async function handleApiRequest(
         },
       }
     )
-  }
 
   try {
     const result = await Effect.runPromise(
-      handler(params, request).pipe(Effect.provide(entry.layer)) as Effect.Effect<
-        unknown,
-        unknown,
-        never
-      >
+      handler(params, request).pipe(
+        Effect.provide(entry.layer)
+      ) as Effect.Effect<unknown, unknown, never>
     )
 
     return Response.json(result)
@@ -157,8 +152,7 @@ async function handleApiRequest(
 
     return Response.json(
       {
-        error:
-          error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? error.message : String(error),
         name: error instanceof Error ? error.name : 'ApiError',
       },
       { status }
