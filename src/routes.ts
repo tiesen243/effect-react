@@ -13,4 +13,12 @@ const WebRoutes = RouteBuilder.empty
 
 const ApiRoutes = RouteBuilder.empty.prefix('/api').add(ApiHelloRoute)
 
-export default RouteBuilder.empty.merge(ApiRoutes).merge(WebRoutes)
+export default RouteBuilder.empty
+  .merge(ApiRoutes)
+  .merge(WebRoutes)
+
+  .cors({
+    origin: '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+  })

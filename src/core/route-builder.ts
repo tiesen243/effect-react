@@ -8,11 +8,21 @@ type AnyLayer = Layer.Layer<any, any, any>
 
 export type Layout = (props: { children: React.ReactNode }) => React.ReactNode
 
+export type CorsOptions = {
+  readonly origin?: string | readonly string[]
+  readonly methods?: readonly string[]
+  readonly allowedHeaders?: readonly string[]
+  readonly exposedHeaders?: readonly string[]
+  readonly credentials?: boolean
+  readonly maxAge?: number
+}
+
 export type RouteEntry<TRoute extends AnyRoute = AnyRoute> = {
   readonly route: TRoute
   readonly layer: AnyLayer
   readonly layouts: readonly Layout[]
   readonly scope: symbol
+  readonly cors?: CorsOptions
 }
 
 type LayerOutput<L> = L extends Layer.Layer<infer A, any, any> ? A : never
@@ -37,6 +47,7 @@ export class RouteBuilder<
     private readonly layouts: readonly Layout[],
     private readonly prefixValue: string,
     private readonly entries: readonly RouteEntry[],
+    private readonly corsOptions?: CorsOptions,
     private readonly scope: symbol = Symbol('RouteBuilderScope')
   ) {}
 
@@ -53,6 +64,7 @@ export class RouteBuilder<
       [...this.layouts, layout],
       this.prefixValue,
       this.entries,
+      this.corsOptions,
       this.scope
     )
   }
@@ -77,8 +89,15 @@ export class RouteBuilder<
       this.prefixValue,
       [
         ...this.entries,
-        this.createEntry(normalized, this.layer, this.layouts, this.scope),
+        this.createEntry(
+          normalized,
+          this.layer,
+          this.layouts,
+          this.scope,
+          this.corsOptions
+        ),
       ],
+      this.corsOptions,
       this.scope
     )
   }
@@ -107,6 +126,7 @@ export class RouteBuilder<
       this.layouts,
       nextPrefix,
       entries,
+      this.corsOptions,
       this.scope
     )
   }
@@ -132,7 +152,9 @@ export class RouteBuilder<
       this.entries.map((entry) => ({
         ...entry,
         layer: Layer.merge(entry.layer, layer),
+        cors: this.corsOptions,
       })),
+      this.corsOptions,
       this.scope
     )
   }
@@ -162,12 +184,31 @@ export class RouteBuilder<
       this.layouts,
       this.prefixValue,
       [...this.entries, ...childEntries],
+      this.corsOptions,
+      this.scope
+    )
+  }
+
+  public cors(
+    options: CorsOptions
+  ): RouteBuilder<TRoutes, TLayer, TLayouts, TRequires> {
+    return new RouteBuilder(
+      this.routes,
+      this.layer,
+      this.layouts,
+      this.prefixValue,
+      this.entries.map((entry) => ({ ...entry, cors: options })),
+      options,
       this.scope
     )
   }
 
   public get _routes(): readonly AnyRoute[] {
     return this.routes
+  }
+
+  public get _cors(): CorsOptions | undefined {
+    return this.corsOptions
   }
 
   public get _entries(): readonly RouteEntry<TRoutes[number]>[] {
@@ -178,9 +219,10 @@ export class RouteBuilder<
     route: AnyRoute,
     layer: AnyLayer,
     layouts: readonly Layout[],
-    scope: symbol
+    scope: symbol,
+    cors?: CorsOptions
   ): RouteEntry {
-    return { route, layer, layouts, scope }
+    return { route, layer, layouts, scope, cors }
   }
 
   private joinPaths(left: string, right: string): PathInput {

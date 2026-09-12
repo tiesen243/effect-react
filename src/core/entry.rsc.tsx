@@ -48,9 +48,9 @@ export type RscError = {
 // However, server entries can be executed differently by registering your own server handler.
 export default { fetch: handler }
 
-async function getEntries() {
+async function getRouteBuilder() {
   const routesModule = await import('@/routes')
-  return routesModule.default._entries
+  return routesModule.default
 }
 
 async function renderRoute(
@@ -160,16 +160,116 @@ async function handleApiRequest(
   }
 }
 
+function getAllowedOrigin(
+  request: Request,
+  options: import('@/core/route-builder').CorsOptions | undefined
+): string | undefined {
+  const origin = request.headers.get('origin')
+  if (!origin) return undefined
+
+  const configured = options?.origin
+  if (configured === undefined) return '*'
+
+  if (configured === '*') return options?.credentials ? origin : '*'
+
+  const origins = Array.isArray(configured) ? configured : [configured]
+  return origins.includes(origin) ? origin : undefined
+}
+
+function withCors(
+  request: Request,
+  response: Response,
+  options: import('@/core/route-builder').CorsOptions | undefined
+): Response {
+  if (!options) return response
+
+  const origin = request.headers.get('origin')
+  if (!origin) return response
+
+  const allowedOrigin = getAllowedOrigin(request, options)
+  if (!allowedOrigin) return response
+
+  const headers = new Headers(response.headers)
+  headers.set('Access-Control-Allow-Origin', allowedOrigin)
+
+  if (allowedOrigin !== '*') headers.append('Vary', 'Origin')
+
+  if (options.credentials)
+    headers.set('Access-Control-Allow-Credentials', 'true')
+
+  if (options.exposedHeaders?.length)
+    headers.set(
+      'Access-Control-Expose-Headers',
+      options.exposedHeaders.join(', ')
+    )
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  })
+}
+
+function handleCorsPreflight(
+  request: Request,
+  options: import('@/core/route-builder').CorsOptions | undefined
+): Response | undefined {
+  if (!options || request.method.toUpperCase() !== 'OPTIONS') return undefined
+  if (!request.headers.has('origin')) return new Response(null, { status: 204 })
+
+  const allowedOrigin = getAllowedOrigin(request, options)
+  if (!allowedOrigin) {
+    return new Response('Forbidden', { status: 403 })
+  }
+
+  const headers = new Headers()
+  headers.set('Access-Control-Allow-Origin', allowedOrigin)
+
+  if (allowedOrigin !== '*') headers.append('Vary', 'Origin')
+
+  headers.set(
+    'Access-Control-Allow-Methods',
+    options.methods?.join(', ') ?? 'GET, POST, OPTIONS'
+  )
+
+  const requestedHeaders = request.headers.get('Access-Control-Request-Headers')
+  if (options.allowedHeaders?.length)
+    headers.set(
+      'Access-Control-Allow-Headers',
+      options.allowedHeaders.join(', ')
+    )
+  else if (requestedHeaders)
+    headers.set('Access-Control-Allow-Headers', requestedHeaders)
+
+  if (options.credentials)
+    headers.set('Access-Control-Allow-Credentials', 'true')
+
+  if (options.maxAge !== undefined)
+    headers.set('Access-Control-Max-Age', String(options.maxAge))
+
+  return new Response(null, { status: 204, headers })
+}
+
 async function handler(request: Request): Promise<Response> {
+  const routeBuilder = await getRouteBuilder()
+  const corsOptions = routeBuilder._cors
+
+  const preflight = handleCorsPreflight(request, corsOptions)
+  if (preflight) return preflight
+
   // differentiate RSC, SSR, action, etc.
   const renderRequest = parseRenderRequest(request)
   request = renderRequest.request
 
-  const entries = await getEntries()
+  const entries = routeBuilder._entries
 
-  if (!renderRequest.isRsc && isApiPath(renderRequest.url.pathname)) {
-    return handleApiRequest(entries, renderRequest.request, renderRequest.url)
-  }
+  const respond = (response: Response) =>
+    withCors(renderRequest.request, response, corsOptions)
+
+  if (!renderRequest.isRsc && isApiPath(renderRequest.url.pathname))
+    return respond(
+      await handleApiRequest(entries, renderRequest.request, renderRequest.url)
+    )
 
   // handle server function request
   let returnValue: RscPayload['returnValue'] | undefined
@@ -184,12 +284,11 @@ async function handler(request: Request): Promise<Response> {
     !renderRequest.actionId
   ) {
     const entry = selectRoute(entries, renderRequest.url.pathname)
-    if (!entry || !entry.route.action) {
-      return new Response('Method Not Allowed', { status: 405 })
-    }
+    if (!entry || !entry.route.action)
+      return respond(new Response('Method Not Allowed', { status: 405 }))
 
     const match = matchPath(entry.route.path, renderRequest.url.pathname)
-    if (!match) return new Response('Not Found', { status: 404 })
+    if (!match) return respond(new Response('Not Found', { status: 404 }))
 
     const params = entry.route.params
       ? Schema.decodeUnknownSync(entry.route.params)(match.params)
@@ -225,9 +324,11 @@ async function handler(request: Request): Promise<Response> {
         const result = await decodedAction()
         formState = await decodeFormState(result, formData)
       } catch {
-        return new Response('Internal Server Error: server action failed', {
-          status: 500,
-        })
+        return respond(
+          new Response('Internal Server Error: server action failed', {
+            status: 500,
+          })
+        )
       }
     }
   }
@@ -270,10 +371,12 @@ async function handler(request: Request): Promise<Response> {
   const rscStream = renderToReadableStream<RscPayload>(rscPayload, rscOptions)
 
   if (renderRequest.isRsc) {
-    return new Response(rscStream, {
-      status: status ?? actionStatus,
-      headers: { 'content-type': 'text/x-component;charset=utf-8' },
-    })
+    return respond(
+      new Response(rscStream, {
+        status: status ?? actionStatus,
+        headers: { 'content-type': 'text/x-component;charset=utf-8' },
+      })
+    )
   }
 
   const ssrEntryModule = await import.meta.viteRsc.loadModule<
@@ -284,10 +387,12 @@ async function handler(request: Request): Promise<Response> {
     debugNojs: renderRequest.url.searchParams.has('__nojs'),
   })
 
-  return new Response(ssrResult.stream, {
-    status: status ?? ssrResult.status,
-    headers: { 'Content-type': 'text/html' },
-  })
+  return respond(
+    new Response(ssrResult.stream, {
+      status: status ?? ssrResult.status,
+      headers: { 'Content-type': 'text/html' },
+    })
+  )
 }
 
 if (import.meta.hot) {

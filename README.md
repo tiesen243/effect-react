@@ -305,6 +305,51 @@ POST /api/hello  -> action()
 
 API routes are intended to return serializable data and do not render the normal page layout/RSC tree as their response body.
 
+## CORS
+
+CORS is configured once at the root `RouteBuilder` and is inherited by the
+whole application, including API routes.
+
+```tsx
+export default RouteBuilder.empty
+  .layout(RootLayout)
+  .add(IndexRoute)
+  .merge(apiRoutes)
+  .merge(dashboardRoutes)
+  .cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+  })
+```
+
+The CORS layer is handled at the HTTP boundary, before route dispatch. It
+supports preflight (`OPTIONS`) requests and can configure:
+
+```ts
+type CorsOptions = {
+  origin?: string | readonly string[]
+  methods?: readonly string[]
+  allowedHeaders?: readonly string[]
+  exposedHeaders?: readonly string[]
+  credentials?: boolean
+  maxAge?: number
+}
+```
+
+For credentialed requests, use explicit origins rather than `'*'`:
+
+```tsx
+.cors({
+  origin: ['https://app.example.com'],
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+})
+```
+
+CORS is intentionally not part of `createRoute()`. Routes only define their
+HTTP behavior; the root application builder owns the cross-origin policy.
+
 ## Client Navigation
 
 The client router lives in `src/core/react.tsx`.
