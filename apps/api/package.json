@@ -1,0 +1,36 @@
+{
+  "name": "@effect-react/api",
+  "version": "0.0.0",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tiesen243/effect-react.git",
+    "directory": "apps/web"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "check": "vp check",
+    "dev": "vp pack --watch",
+    "prepublishOnly": "vp run build",
+    "test": "vp test"
+  },
+  "dependencies": {
+    "@effect-react/contract": "workspace:*",
+    "@effect/platform-bun": "catalog:effect",
+    "alchemy": "catalog:",
+    "effect": "catalog:effect"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

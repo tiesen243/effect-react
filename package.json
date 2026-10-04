@@ -1,0 +1,57 @@
+{
+  "name": "effect-react",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "tools/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "vp run -r build",
+    "dev": "vp run @effect-react/infras#dev",
+    "prepare": "vp config",
+    "ready": "vp check && vp run -r test && vp run -r build"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "oxlint-tsgolint": "^7.0.2003",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "overrides": {
+    "vite": "catalog:"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "1.4.2",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "bun": ">=1.4.0",
+    "node": ">=22.18.0"
+  },
+  "catalog": {
+    "@types/bun": "^1.4.2",
+    "alchemy": "^2.0.0-beta.80",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.0.0",
+    "vite-plus": "1.0.0",
+    "typescript": "^7.0.2"
+  },
+  "catalogs": {
+    "effect": {
+      "@effect/atom-react": "^4.0.1",
+      "@effect/platform-bun": "^4.0.0",
+      "@effect/platform-node": "^4.0.0",
+      "effect": "^4.0.0"
+    },
+    "react": {
+      "@types/react": "^19.3.0",
+      "@types/react-dom": "^19.3.0",
+      "react": "^19.3.0",
+      "react-dom": "^19.3.0"
+    }
+  }
+}

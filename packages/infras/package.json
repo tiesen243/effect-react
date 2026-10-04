@@ -1,0 +1,38 @@
+{
+  "name": "@effect-react/infras",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tiesen243/effect-react.git",
+    "directory": "packages/infras"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/alchemy.run.mjs",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "check": "vp check",
+    "deploy": "bun --bun run alchemy deploy",
+    "destroy": "bun --bun run alchemy destroy",
+    "dev": "bun --bun run alchemy dev",
+    "prepublishOnly": "vp run build"
+  },
+  "dependencies": {
+    "@effect-react/api": "workspace:*",
+    "@effect-react/web": "workspace:*",
+    "@effect/platform-bun": "catalog:effect",
+    "@effect/platform-node": "catalog:effect",
+    "alchemy": "catalog:",
+    "effect": "catalog:effect"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}
