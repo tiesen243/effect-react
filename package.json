@@ -13,8 +13,8 @@
     "ready": "vp check && vp run -r test && vp run -r build"
   },
   "devDependencies": {
-    "oxfmt": "^0.71.0",
-    "oxlint": "^1.86.0",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
     "oxlint-tsgolint": "^7.0.2003",
     "vite": "catalog:",
     "vite-plus": "catalog:"
@@ -35,17 +35,17 @@
   },
   "catalog": {
     "@types/bun": "^1.4.2",
-    "alchemy": "^2.0.0-beta.80",
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.0.0",
-    "vite-plus": "1.0.0",
+    "alchemy": "^2.0.0-beta.81",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.1.0",
+    "vite-plus": "1.1.0",
     "typescript": "^7.0.2"
   },
   "catalogs": {
     "effect": {
-      "@effect/atom-react": "^4.0.1",
-      "@effect/platform-bun": "^4.0.0",
-      "@effect/platform-node": "^4.0.0",
-      "effect": "^4.0.0"
+      "@effect/atom-react": "^4.0.2",
+      "@effect/platform-bun": "^4.0.2",
+      "@effect/platform-node": "^4.0.2",
+      "effect": "^4.0.2"
     },
     "react": {
       "@types/react": "^19.3.0",
